@@ -11,8 +11,10 @@ comparepartitons=$3
 #echo "comparepartitons: $comparepartitons"
 if [ "$action" == "check" ]; then
     filename="newDevice_$type.txt"
+    devicename="newDevice"
 elif [ "$action" == "create" ]; then
     filename="oldDevice_$type.txt"
+    devicename="oldDevice"
 fi
 
 if [ "$type" == "virtual" ]; then
@@ -26,9 +28,16 @@ elif [ "$type" == "node" ]; then
     confilter="cur-sessions"
 fi
 
-echo "Creating $filter list for $filename"
+
 # set variables
 date=`date '+%Y_%m_%d'`
+confile="connections_${filename}"
+statusfile="status_${filename}"
+echo "As of $date" > $statusfile
+echo "As of $date" > $confile
+echo "Creating $filter list for $devicename"
+#
+#
 # get list of partitions
 # partitions=`tmsh list auth partition | grep partition | grep -v Common | cut -f3 -d' '`
 #
@@ -41,7 +50,8 @@ inventory=$(tmsh -q -c 'cd /; list ltm '$type'  recursive one-line' | grep "$fil
 #get name
 #get status
 #get connections
-echo "As of $date" > $filename
+#
+#
 while read -r line; do
 #reading lines of $inventory and checking number of occurrences per entry
     name=$line
@@ -50,20 +60,19 @@ while read -r line; do
     fi
     status=$(tmsh -q -c 'cd /; show ltm '$type' '$line' field-fmt' | grep status.availability-state | awk '{print $2}')
     connections=$(tmsh -q -c 'cd /; show ltm '$type' '$line' field-fmt' | grep $confilter | awk '{print $2}')
-    confile="connections_$filename"
     if [ "$comparepartitons" == 0 ]; then
         line="$(cut -d'/' -f 2,3 <<<"$line")"
         #echo "mod line: ${line[@]}"
     fi
     printf "name:$line,currentconnections:$connections\n" >> $confile
-    printf "name:$line,status:$status\n" >> $filename
+    printf "name:$line,status:$status\n" >> $statusfile
         done <<< "$inventory"
 #
 #use name to lookup the status, use the name to lookup the total connections
 #print $item /r/n $status /r/n $connections >> oldDevice.txt
-items=$(wc -l < $filename)
+items=$(wc -l < $statusfile)
 items=$(let items=items-1)
-message="$type List created in $filename, $items"
+message="$type List created in $statusfile, $items"
 echo $message
 #
 #
@@ -90,7 +99,7 @@ elif [ "$type" == "node" ]; then
     filename="newDevice_$type.txt"
 fi
 
-    echo "generating newDevice_'$type'.txt"
+    echo "generating status_${filename}"
     createList check $type;
 }
 #
@@ -106,12 +115,12 @@ elif [ "$type" == "node" ]; then
 fi
  
     ls -h
-    echo "removing oldDevice_$type.txt"
-    rm -f oldDevice_$type.txt
+    echo "removing status_oldDevice_$type.txt"
+    rm -f status_oldDevice_$type.txt
     rm -f connections_oldDevice_$type.txt
     rm -f rm -f connections_oldDevice_"$type"_removed_zero.txt
     echo "removing newDevice_$type.txt"
-    rm -f newDevice_$type.txt
+    rm -f status_newDevice_$type.txt
     rm -f connections_newDevice_$type.txt
     rm -f rm -f connections_newDevice_"$type"_removed_zero.txt
     ls -h
@@ -125,13 +134,17 @@ createDiff() {
 type=$1
 date=`date '+%Y_%m_%d'`
 #
-echo "Diff newDevice_'$type'.txt and oldDevice_'$type'.txt"
-echo "sending results to diff-$date.txt"
+echo "Diff status_newDevice_${type}.txt and status_oldDevice_${type}.txt"
+echo "sending results to: diff-${type}-status-${date}.txt"
 #diff /var/tmp/$partition-virtual-address-state-precheck.txt /var/tmp/$partition-virtual-address-state-postcheck.txt > /var/tmp/$partition-virtual-address-state-diffs-$datestamp.txt
-diff oldDevice_$type.txt newDevice_$type.txt > diff-$type-$date.txt
-echo "Diff connections"
-diff connections_oldDevice_$type.txt connections_newDevice_$type.txt > diff-connections-$type-$date.txt
-ls -h
+diff status_oldDevice_$type.txt status_newDevice_$type.txt > diff-${type}-status-${date}.txt
+echo "Diff connections_newDevice_${type}.txt and connections_oldDevice_${type}.txt"
+echo "sending results to: diff-${type}-connections-${date}.txt"
+diff connections_oldDevice_$type.txt connections_newDevice_${type}.txt > diff-${type}-connections-${date}.txt
+echo "Diff removed zero connections_oldDevice_${type}_removed_zero.txt and connections_newDevice_${type}_removed_zero.txt"
+echo "sending results to: diff-$type-connections-removed_zero-${date}.txt"
+diff connections_oldDevice_${type}_removed_zero.txt connections_newDevice_${type}_removed_zero.txt > diff-$type-connections-removed_zero-${date}.txt
+#ls -h
 }
 #
 # sub menu verbose
@@ -298,21 +311,16 @@ do
             break
             ;;
         "9"|"Delete all lists")
-            sub_menu_partitions
-            part="$optionpartitions"
-            sub_menu_verbose
             deleteList virtual $part;
             deleteList pool $part;
             deleteList node $part;
             break
             ;;
         "10"|"Create diff")
-            sub_menu_partitions
-            part="$optionpartitions"
-            sub_menu_verbose
             createDiff virtual $part;
             createDiff pool $part;
             createDiff node $part;
+            ls -h
             break
             ;;
         "11"|"Quit"|"q"|"Q"|"e")

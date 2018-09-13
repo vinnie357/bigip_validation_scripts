@@ -65,12 +65,14 @@ connections_newDevice_node.txt
 connections_newDevice_node_removed_zero.txt
 
 #### diffs ###
-diff-virtual-2018_08_27.txt
-diff-pool-2018_08_27.txt
-diff-node-2018_08_27.txt
-diff-connections-virtual-2018_08_27.txt
-diff-connections-pool-2018_08_27.txt
-diff-connections-node-2018_08_27.txt
-diff-connections-node-2018_08_27_removed_zero.txt
+diff-virtual-status-2018_08_27.txt
+diff-pool-status-2018_08_27.txt
+diff-node-status-2018_08_27.txt
+diff-virtual-connections-2018_08_27.txt
+diff-pool-connections-2018_08_27.txt
+diff-node-connections-2018_08_27.txt
+diff-virtual-connections-removed_zero-2018_08_27.txt
+diff-pool-connections-removed_zero-2018_08_27.txt
+diff-node-connections-removed_zero-2018_08_27.txt
 ```
 
