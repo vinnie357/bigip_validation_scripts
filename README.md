@@ -43,9 +43,9 @@ Exits the script menu
 ## Outputs created by script
 ```
 ### old device ###
-oldDevice_virtual.txt
-oldDevice_pool.txt
-oldDevice_node.txt
+status_oldDevice_virtual.txt
+status_oldDevice_pool.txt
+status_oldDevice_node.txt
 connections_oldDevice_virtual.txt
 connections_oldDevice_virtual_removed_zero.txt
 connections_oldDevice_pool.txt
@@ -54,9 +54,9 @@ connections_oldDevice_node.txt
 connections_oldDevice_node_removed_zero.txt
 
 #### new device ###
-newDevice_virtual.txt
-newDevice_pool.txt
-newDevice_node.txt
+status_newDevice_virtual.txt
+status_newDevice_pool.txt
+status_newDevice_node.txt
 connections_newDevice_virtual.txt
 connections_newDevice_virtual_removed_zero.txt
 connections_newDevice_pool.txt
@@ -71,5 +71,6 @@ diff-node-2018_08_27.txt
 diff-connections-virtual-2018_08_27.txt
 diff-connections-pool-2018_08_27.txt
 diff-connections-node-2018_08_27.txt
+diff-connections-node-2018_08_27_removed_zero.txt
 ```
 
