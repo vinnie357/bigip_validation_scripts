@@ -7,6 +7,8 @@
 createList() {
 action=$1
 type=$2
+comparepartitons=$3
+#echo "comparepartitons: $comparepartitons"
 if [ "$action" == "check" ]; then
     filename="newDevice_$type.txt"
 elif [ "$action" == "create" ]; then
@@ -43,10 +45,16 @@ echo "As of $date" > $filename
 while read -r line; do
 #reading lines of $inventory and checking number of occurrences per entry
     name=$line
-    echo "working on ${line[@]}"
+    if [ "$optionverbose" == 1 ]; then
+        echo "working on ${line[@]}"
+    fi
     status=$(tmsh -q -c 'cd /; show ltm '$type' '$line' field-fmt' | grep status.availability-state | awk '{print $2}')
     connections=$(tmsh -q -c 'cd /; show ltm '$type' '$line' field-fmt' | grep $confilter | awk '{print $2}')
     confile="connections_$filename"
+    if [ "$comparepartitons" == 0 ]; then
+        line="$(cut -d'/' -f 2,3 <<<"$line")"
+        #echo "mod line: ${line[@]}"
+    fi
     printf "name:$line,currentconnections:$connections\n" >> $confile
     printf "name:$line,status:$status\n" >> $filename
         done <<< "$inventory"
@@ -60,9 +68,11 @@ echo $message
 #
 #
 # uncomment me to check current connections needs rework
-echo "removing objects with zero connections"
+#echo "removing objects with zero connections"
 basename=${confile%.txt}
 grep -v "currentconnections:0" $confile > $basename'_removed_zero.txt'
+echo "$type zero connections list created in ${basename}_removed_zero.txt "
+#virtual zero connections list created in connections_oldDevice_virtual'_removed_zero.txt'
 }
 #
 #
@@ -124,55 +134,196 @@ diff connections_oldDevice_$type.txt connections_newDevice_$type.txt > diff-conn
 ls -h
 }
 #
+# sub menu verbose
+#
+# sub menu  verbose options
+#
+optionverbose=0
+option_verbose () {
+    optionverbose=$1
+    echo "verbose: $optionverbose"
+}
+
+#
+sub_menu_verbose(){
+while :
+do
+echo "Verbose output, Default is off:"
+echo -e "\t(1) off"
+echo -e "\t(2) on"
+echo -e "\t(e) Back"
+echo -n "Please enter your choice:"
+read c
+case $c in
+    "1"|"off")
+    # verbose off
+    option_verbose 0
+    break 
+    ;;
+    "2"|"on")
+    # verbose on
+    option_verbose 1
+    break
+    ;;
+    "e"|"E"|"q")
+    break
+    ;;
+        *)
+        echo "invalid answer, please try again"
+        ;;
+esac
+done
+}
+#
+# sub menu paritions
+#
+#
+# sub menu  paritions options
+optionpartitions=1
+option_partitions () {
+    optionpartitions=$1
+    echo "paritions: $optionpartitions"
+}
+#
+#
+#
+sub_menu_partitions(){
+while :
+do
+echo "Compare Objects by partiton Default is on:"
+echo -e "\t(1) partitons on"
+echo -e "\t(2) partitons off"
+echo -e "\t(e) Back"
+echo -n "Please enter your choice:"
+read c
+case $c in
+    "1")
+    # partitons on
+    option_partitions 1
+    break 
+    ;;
+    "2")
+    # partitons off
+    option_partitions 0
+    break
+    ;;
+    "e"|"E"|"q")
+    break
+    ;;
+        *)
+        echo "invalid answer, please try again"
+        ;;
+esac
+done
+}
+#
 # menu
 #
-PS3='Please select an action: '
-#options=("Create list" "Check list" "Delete list" "View diff" "Quit")
-options=("Create list All Old Device" "Create list virtuals Old Device" "Create list pools Old Device" "Create list nodes Old Device" "Check list All New Device" "Check list virtuals New Device" "Check list pools New Device" "Check list nodes New Device" "Delete all lists" "Create diff" "Quit")
-select opt in "${options[@]}"
+main_menu(){
+echo "Please select an Action:"
+echo -e "\t(1) Create list All Old Device" 
+echo -e "\t(2) Create list virtuals Old Device" 
+echo -e "\t(3) Create list pools Old Device" 
+echo -e "\t(4) Create list nodes Old Device" 
+echo -e "\t(5) Check list All New Device" 
+echo -e "\t(6) Check list virtuals New Device"
+echo -e "\t(7) Check list pools New Device"
+echo -e "\t(8) Check list nodes New Device"
+echo -e "\t(9) Delete all lists"
+echo -e "\t(10) Create diff"
+echo -e "\t(q) Quit"
+echo -n "Please enter your choice:"
+read opt
+while :
 do
     case $opt in
-        "Create list All Old Device")
-            createList create virtual;
-            createList create pool;
-            createList create node;
+        "1"|"Create list All Old Device")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            createList create virtual $part ;
+            createList create pool $part;
+            createList create node $part;
+            break
             ;;
-        "Create list virtuals Old Device")
-            createList create virtual;
+        "2"|"Create list virtuals Old Device")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            createList create virtual $part;
+            break
             ;;
-        "Create list pools Old Device")
-            createList create pool;
+        "3"|"Create list pools Old Device")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            createList create pool $part;
+            break
             ;;
-        "Create list nodes Old Device")
-            createList create node;
+        "4"|"Create list nodes Old Device")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            createList create node $part;
+            break
             ;;
-        "Check list All New Device")
-            createList check virtual;
-            createList check pool;
-            createList check node;
+        "5"|"Check list All New Device")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            createList check virtual $part;
+            createList check pool $part;
+            createList check node $part;
+            break
             ;;
-        "Check list virtuals New Device")
-            createList check virtual;
+        "6"|"Check list virtuals New Device")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            createList check virtual $part;
+            break
             ;;
-        "Check list pools New Device")
-            createList check pool;
+        "7"|"Check list pools New Device")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            createList check pool $part;
+            break
             ;;
-        "Check list nodes New Device")
-            createList check node;
+        "8"|"Check list nodes New Device")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            createList check node $part;        
+            break
             ;;
-        "Delete all lists")
-            deleteList virtual;
-            deleteList pool;
-            deleteList node;
+        "9"|"Delete all lists")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            deleteList virtual $part;
+            deleteList pool $part;
+            deleteList node $part;
+            break
             ;;
-        "Create diff")
-            createDiff virtual;
-            createDiff pool;
-            createDiff node;
+        "10"|"Create diff")
+            sub_menu_partitions
+            part="$optionpartitions"
+            sub_menu_verbose
+            createDiff virtual $part;
+            createDiff pool $part;
+            createDiff node $part;
+            break
             ;;
-        "Quit")
+        "11"|"Quit"|"q"|"Q"|"e")
             break
             ;;
         *) echo "invalid option $REPLY";;
     esac
 done
+}
+
+#
+# start menu
+#
+main_menu
