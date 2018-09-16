@@ -83,4 +83,13 @@ diff-node-connections-removed_zero-2018_08_27.txt
 #### logs ###
 logfiles_2018_09_16.tar.gz
 ```
-
+## ToDo ##
+1.  Connectivity Stats
+- needs: menu, logic, diffs
+  - objects:
+    - interface
+      - show net interface field-fmt | grep 'name\|status\|counters.drops\|counters.errors\|counters.pkts-*'
+    - trunk
+      - show net interface field-fmt |  grep 'status\|name'
+    - vlans
+      - show net vlan field-fmt | grep 'status\|ifname'
