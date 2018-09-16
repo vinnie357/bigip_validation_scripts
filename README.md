@@ -41,7 +41,7 @@ If you have old and new device outputs, this will create a diff output for each 
 Creates a tarball of /var/log/* per: https://support.f5.com/csp/article/K9360
 ### 12. View current logs
 accepts a module, and does a tail with the follow command on your device
-ex: tailf /var/log/<yourchoice> | grep -i <user input>
+ex: tailf /var/log/{yourchoice} | grep -i {user input}
 ### 13. Quit
 Exits the script menu
 
