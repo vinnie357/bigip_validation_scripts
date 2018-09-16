@@ -103,7 +103,7 @@ fi
     createList check $type;
 }
 #
-#
+# deletes the lists created by the script
 deleteList() {
 type=$1
 if [ "$type" == "virtual" ]; then
@@ -125,11 +125,12 @@ fi
     rm -f rm -f connections_newDevice_"$type"_removed_zero.txt
     ls -h
 }
-
+# opens the diff file by type
 viewDiff() {
 type=$1
     less diff-$type-$date.txt
 }
+# creates the diffs by type
 createDiff() {
 type=$1
 date=`date '+%Y_%m_%d'`
@@ -146,6 +147,16 @@ echo "sending results to: diff-$type-connections-removed_zero-${date}.txt"
 diff connections_oldDevice_${type}_removed_zero.txt connections_newDevice_${type}_removed_zero.txt > diff-$type-connections-removed_zero-${date}.txt
 #ls -h
 }
+#
+# create the log tar ball for support per: https://support.f5.com/csp/article/K9360
+#
+createLogs() {
+date=`date '+%Y_%m_%d'`
+echo "creating log tarball in $PWD "
+tar -czpf logfiles_$date.tar.gz /var/log/*
+ls -lh $PWD/logfiles_$date.tar.gz
+}
+
 #
 # sub menu verbose
 #
@@ -244,6 +255,8 @@ echo -e "\t(7) Check list pools New Device"
 echo -e "\t(8) Check list nodes New Device"
 echo -e "\t(9) Delete all lists"
 echo -e "\t(10) Create diff"
+echo -e "\t(11) Tar logs for F5 Support"
+echo -e "\t(12) View current logs"
 echo -e "\t(q) Quit"
 echo -n "Please enter your choice:"
 read opt
@@ -323,7 +336,64 @@ do
             ls -h
             break
             ;;
-        "11"|"Quit"|"q"|"Q"|"e")
+        "11"|"logs")
+            createLogs
+            break
+            ;;
+        "12"|"tailf logs")
+            echo "Please select a Module:"
+            echo -e "\t(1) ltm" 
+            echo -e "\t(2) apm" 
+            echo -e "\t(3) asm"
+            echo -e "\t(4) gtm"
+            echo -e "\t(5) afm"
+            echo -n "Module input:"
+            read module
+            case $module in
+            "1"|"ltm")
+                mod="ltm"
+                ;;
+            "2"|"apm")
+                mod="apm"
+                ;;
+            "3"|"asm")
+                mod="asm"
+                ;;
+            "4"|"gtm")
+                mod="gtm"
+                ;;
+            "5"|"afm")
+                mod="afm"
+                ;;
+            *)
+                echo "Not found in this list"
+                ;;
+            esac
+            echo "Do want to filter the output?:"
+            echo -e "\t(1) yes" 
+            echo -e "\t(2) no"
+            read filter
+            case $filter in
+            "1"|"yes")
+                grep="yes"
+                ;;
+            "2"|"no")
+                grep="no"
+                ;;
+            esac
+            if [ "$grep" == "yes" ]; then
+                #echo "grep was $grep"
+                echo "Please set a grep filter:"
+                echo -n "grep -i <your input>:"
+                read grepfilter
+                if [ "$grepfilter" == "" ]; then
+                grepfilter="'[ A-Za-z0-9]*'"
+                fi
+                tailf /var/log/$mod | grep -i $grepfilter
+            fi
+            tailf /var/log/$mod
+            ;;
+        "13"|"Quit"|"q"|"Q"|"e")
             break
             ;;
         *) echo "invalid option $REPLY";;

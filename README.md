@@ -37,7 +37,12 @@ Creates an output file for current connection counts as well as object status fo
 Attempts to delete all the lists created
 ### 10. Create diff
 If you have old and new device outputs, this will create a diff output for each object type based on object name type status and current connection counts
-### 11. Quit
+### 11. Tar logs for F5 Support
+Creates a tarball of /var/log/* per: https://support.f5.com/csp/article/K9360
+### 12. View current logs
+accepts a module, and does a tail with the follow command on your device
+ex: tailf /var/log/<yourchoice> | grep -i <user input>
+### 13. Quit
 Exits the script menu
 
 ## Outputs created by script
@@ -74,5 +79,8 @@ diff-node-connections-2018_08_27.txt
 diff-virtual-connections-removed_zero-2018_08_27.txt
 diff-pool-connections-removed_zero-2018_08_27.txt
 diff-node-connections-removed_zero-2018_08_27.txt
+
+#### logs ###
+logfiles_2018_09_16.tar.gz
 ```
 
