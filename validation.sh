@@ -42,7 +42,7 @@ echo "Creating $filter list for $devicename"
 # partitions=`tmsh list auth partition | grep partition | grep -v Common | cut -f3 -d' '`
 #
 # Get list of all items
-inventory=$(tmsh -q -c 'cd /; list ltm '$type'  recursive one-line' | grep "$filter" | awk '{print $3}')
+inventory=$(nice -n 19 tmsh -q -c 'cd /; list ltm '$type'  recursive one-line' | grep "$filter" | awk '{print $3}')
 #
 #
 # loop through and log to text file oldDevice.txt
@@ -58,8 +58,8 @@ while read -r line; do
     if [ "$optionverbose" == 1 ]; then
         echo "working on ${line[@]}"
     fi
-    status=$(tmsh -q -c 'cd /; show ltm '$type' '$line' field-fmt' | grep status.availability-state | awk '{print $2}')
-    connections=$(tmsh -q -c 'cd /; show ltm '$type' '$line' field-fmt' | grep $confilter | awk '{print $2}')
+    status=$(nice -n 19 tmsh -q -c 'cd /; show ltm '$type' '$line' field-fmt' | grep status.availability-state | awk '{print $2}')
+    connections=$(nice -n 19 tmsh -q -c 'cd /; show ltm '$type' '$line' field-fmt' | grep $confilter | awk '{print $2}')
     if [ "$comparepartitons" == 0 ]; then
         line="$(cut -d'/' -f 2,3 <<<"$line")"
         #echo "mod line: ${line[@]}"

@@ -89,7 +89,9 @@ logfiles_2018_09_16.tar.gz
   - objects:
     - interface
       - show net interface field-fmt | grep 'name\|status\|counters.drops\|counters.errors\|counters.pkts-*'
+      - tmsh show net interface field-fmt | grep 'status\|name' | awk '{print $2}'
     - trunk
       - show net interface field-fmt |  grep 'status\|name'
     - vlans
       - show net vlan field-fmt | grep 'status\|ifname'
+      - tmsh show net vlan field-fmt | grep 'status\|ifname' | awk '{print $2}'
